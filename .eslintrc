@@ -19,10 +19,6 @@
           "log"
         ]
       }
-    ],
-    "quotes": [
-      "error",
-      "double"
     ]
   }
 }
