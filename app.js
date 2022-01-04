@@ -1,10 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const { PORT = 3000 } = process.env;
 const router = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const auth = require('./middlewares/auth');
 const { createUser, login } = require('./controllers/users');
 const app = express();
 
@@ -12,20 +13,18 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '61cabab87edecfff35dc8985',
-  };
-
-  next();
-});
-
 app.use(express.json());
-app.use(router);
-app.use(cardRouter);
-app.use((req, res) => {
-  res.status(404).send({ message: 'Сервер недоступен' });
+app.use(auth);
+app.use('/', router);
+app.use('/', cardRouter);
+app.use('*', (req, res, next) => {
+  const err = new Error('Cтраница не найдена');
+  err.statusCode = 404;
+
+  next(err);
 });
+
+app.use(errors());
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -44,6 +43,18 @@ app.post('/signin', celebrate({
   }),
 }), login);
 
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
+
 app.listen(PORT, () => {
-  console.log(`Стартуем на порту ${PORT}`);
+  console.log(`Запуск на порту ${PORT}`);
 });

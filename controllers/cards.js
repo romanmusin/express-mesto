@@ -24,20 +24,32 @@ module.exports.getCards = (req, res) => {
     .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
 };
 
-module.exports.deleteCards = (req, res) => {
+module.exports.deleteCards = (req, res, next) => {
   card
-    .findByIdAndRemove(req.params.cardId)
+    .findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Нет карточки с таким id' });
+        const err = new Error('Карточка с указанным _id не найден');
+        err.statusCode = 404;
+
+        next(err);
+      } else if (req.user._id !== card.owner.toString()) {
+        const errNew = new Error('Отказано в доступе');
+        errNew.statusCode = 403;
+
+        next(errNew);
+      } else {
+        card.remove().then(() => res.send({ data: card }));
       }
-      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Введен невалидный id карточки' });
+        const errNew = new Error('Переданы некорректные данные');
+        errNew.statusCode = 400;
+
+        next(errNew);
       }
-      res.status(500).send({ message: 'Произошла ошибка сервера' });
+      next(err);
     });
 };
 
