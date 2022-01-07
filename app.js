@@ -10,15 +10,12 @@ const centralizedErrors = require('./middlewares/centralizedErrors');
 const auth = require('./middlewares/auth');
 const { createUser, login } = require('./controllers/users');
 const { isValidUrl } = require('./utils/methods');
+const NotFoundError = require('./errors/notFoundErr');
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(express.json());
-app.use('/', router);
-app.use('/', cardRouter);
-
-app.use(errors());
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -41,29 +38,15 @@ app.post('/signin', celebrate({
   }),
 }), login);
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
-
 app.use(auth);
 
 app.use(router);
+app.use(cardRouter);
 app.use(errors());
 app.use(centralizedErrors);
 
 app.use('*', (req, res, next) => {
-  const err = new Error('Cтраница не найдена');
-  err.statusCode = 404;
-
-  next(err);
+  next(new NotFoundError('Страница не найдена'));
 });
 
 app.listen(PORT, () => {
