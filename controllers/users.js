@@ -1,3 +1,4 @@
+/* eslint-disable no-shadow */
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const validator = require('validator');
@@ -10,7 +11,9 @@ const NotFoundError = require('../errors/notFoundErr');
 const ConflictError = require('../errors/conflictErr');
 
 module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
   bcrypt
     .hash(password, 10)
@@ -168,7 +171,6 @@ module.exports.login = (req, res, next) => {
           return res
             .cookie('jwt', token, {
               maxAge: 3600000 * 24 * 7,
-              // httpOnly: true,
               secure: true,
               sameSite: 'none',
             })
