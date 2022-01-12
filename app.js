@@ -53,5 +53,6 @@ app.use('*', (req, res, next) => {
 
 app.use(centralizedErrors);
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Запуск на порту ${PORT}`);
 });
