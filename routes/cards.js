@@ -41,11 +41,4 @@ cardRouter.delete('/:cardId/likes', celebrate({
   }),
 }), dislikeCard);
 
-/*
-cardRouter.post('/cards', createCard);
-cardRouter.delete('/cards/:cardId', deleteCards);
-cardRouter.put('/cards/:cardId/likes', likeCard);
-cardRouter.delete('/cards/:cardId/likes', dislikeCard);
-*/
-
 module.exports = cardRouter;

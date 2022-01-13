@@ -1,4 +1,4 @@
-const card = require('../models/card');
+const Card = require('../models/card');
 const IncorrectDataError = require('../errors/incorrectDataErr');
 const ForbiddenDataError = require('../errors/forbiddenDataErr');
 const NotFoundError = require('../errors/notFoundErr');
@@ -7,7 +7,7 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
-  card
+  Card
     .create({ name, link, owner })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
@@ -19,7 +19,7 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.getCards = (req, res, next) => {
-  card
+  Card
     .find({})
     .then((card) => res.send({ data: card }))
     .catch(next);
@@ -29,13 +29,9 @@ module.exports.deleteCards = (req, res, next) => {
   const { cardId } = req.params;
   const userId = req.user._id;
 
-  card
+  Card
     .findById(cardId)
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Карточка с указанным id не найдена'));
-      }
-
       if (card.owner._id.toString() === userId) {
         card
           .findByIdAndRemove(cardId)
@@ -59,11 +55,10 @@ module.exports.deleteCards = (req, res, next) => {
 };
 
 module.exports.likeCard = (req, res, next) => {
-  card
+  Card
     .findByIdAndUpdate(
       req.params.cardId,
-      {
-        $addToSet: { likes: req.user._id } },
+      { $addToSet: { likes: req.user._id } },
       { new: true },
     )
     .then((card) => {
@@ -81,7 +76,7 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  card
+  Card
     .findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },

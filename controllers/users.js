@@ -1,9 +1,8 @@
-/* eslint-disable no-shadow */
 require('dotenv').config();
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
-const user = require('../models/user');
+const User = require('../models/user');
 
 const IncorrectDataError = require('../errors/incorrectDataErr');
 const UnauthorizedError = require('../errors/unauthorizedErr');
@@ -21,7 +20,7 @@ module.exports.createUser = (req, res, next) => {
       if (!validator.isEmail(email)) {
         throw new IncorrectDataError('Передан некорректный e-mail');
       }
-      return user.create({
+      return User.create({
         name,
         about,
         avatar,
@@ -53,7 +52,7 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.getUsers = (req, res, next) => {
-  user
+  User
     .find({})
     .then((users) => res.send({ data: users }))
     .catch(next);
@@ -62,7 +61,7 @@ module.exports.getUsers = (req, res, next) => {
 module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
 
-  user
+  User
     .findById(userId)
     .then((user) => {
       if (user) {
@@ -83,7 +82,7 @@ module.exports.getUser = (req, res, next) => {
 module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
-  user
+  User
     .findByIdAndUpdate(
       req.user._id,
       {
@@ -117,7 +116,7 @@ module.exports.updateUser = (req, res, next) => {
 module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
-  user
+  User
     .findByIdAndUpdate(
       req.user._id,
       {
@@ -150,7 +149,7 @@ module.exports.updateAvatar = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  user.findOne({ email }).select('+password')
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         throw new UnauthorizedError('Неправильные почта или пароль');

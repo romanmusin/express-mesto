@@ -1,4 +1,3 @@
-/* eslint-disable prefer-regex-literals */
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -20,6 +19,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 app.use(cookieParser());
 app.use(express.json());
 
+const newLocal = '^[a-zA-Z0-9]{8,}$';
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().default('Жак-Ив Кусто').min(2).max(30),
@@ -28,7 +28,7 @@ app.post('/signup', celebrate({
     email: Joi.string().required().email(),
     password: Joi.string()
       .required()
-      .pattern(new RegExp('^[a-zA-Z0-9]{8,}$')),
+      .pattern(new RegExp(newLocal)),
   }),
 }), createUser);
 
@@ -37,7 +37,7 @@ app.post('/signin', celebrate({
     email: Joi.string().required().email(),
     password: Joi.string()
       .required()
-      .pattern(new RegExp('^[a-zA-Z0-9]{8,}$')),
+      .pattern(new RegExp(newLocal)),
   }),
 }), login);
 
@@ -53,6 +53,5 @@ app.use('*', (req, res, next) => {
 
 app.use(centralizedErrors);
 app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
   console.log(`Запуск на порту ${PORT}`);
 });
